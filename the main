@@ -1,0 +1,61 @@
+// Load tasks from local storage when the page loads
+window.addEventListener("load", () => {
+    const storedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
+    const taskList = document.getElementById("taskList");
+
+    for (const task of storedTasks) {
+        const listItem = createTaskListItem(task.text, task.priority, task.dueDate);
+        taskList.appendChild(listItem);
+    }
+});
+
+function addTask() {
+    const taskInput = document.getElementById("taskInput");
+    const priorityInput = document.getElementById("priorityInput");
+    const dueDateInput = document.getElementById("dueDateInput");
+    const taskList = document.getElementById("taskList");
+
+    const taskText = taskInput.value.trim();
+    const priority = priorityInput.value.trim();
+    const dueDate = dueDateInput.value;
+
+    if (taskText === "" || priority === "" || dueDate === "") return;
+
+    const listItem = createTaskListItem(taskText, priority, dueDate);
+    taskList.appendChild(listItem);
+
+    // Store tasks in local storage
+    const storedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
+    storedTasks.push({ text: taskText, priority, dueDate });
+    localStorage.setItem("tasks", JSON.stringify(storedTasks));
+
+    // Clear input fields
+    taskInput.value = "";
+    priorityInput.value = "";
+    dueDateInput.value = "";
+}
+
+function removeTask(button) {
+    // Remove task from the DOM
+    const listItem = button.parentElement;
+    const taskList = document.getElementById("taskList");
+    taskList.removeChild(listItem);
+
+    // Remove task from local storage
+    const taskText = listItem.querySelector("span").textContent;
+    const storedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
+    const updatedTasks = storedTasks.filter((task) => task.text !== taskText);
+    localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+}
+
+function createTaskListItem(text, priority, dueDate) {
+    const listItem = document.createElement("li");
+    listItem.innerHTML = `
+        <span>${text}</span>
+        <span class="priority">${priority}</span>
+        <span class="due-date">${dueDate}</span>
+        <button onclick="removeTask(this)">Delete</button>
+    `;
+
+    return listItem;
+}
